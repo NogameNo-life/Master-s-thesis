@@ -1,0 +1,158 @@
+% !TeX encoding = UTF-8 Unicode
+% !TeX root = main.tex
+% !TeX TS-program = pdflatex
+%% (При смене движка необходимо удалить вспомогательные файлы *.aux *.brf *.log *.out *.synctex.gz *.toc)
+
+\documentclass{thesisby}
+\usepackage{etoolbox,ifxetex,ifluatex}
+\usepackage[unicode,hypertexnames=false]{hyperref}
+
+%%% Проверка используемого TeX-движка %%%
+\ifboolexpr{bool{xetex} or bool{luatex}}{%
+  \usepackage{fontspec}
+  \PassOptionsToPackage{no-math}{fontspec}     % https://tex.stackexchange.com/a/26295/104425
+  \usepackage{polyglossia}%[2014/05/21]        % Поддержка многоязычности
+
+  % fonts and languages
+  \defaultfontfeatures{Ligatures=TeX,Mapping=tex-text}
+
+  \setmainlanguage[babelshorthands = true]{russian}
+  \setotherlanguage{english}
+
+  \setmainfont{Times New Roman}
+  \setmonofont{Courier New}
+  \setsansfont{Arial}
+
+  \newfontfamily\cyrillicfont[Script=Cyrillic]{Times New Roman}
+  \newfontfamily\cyrillicfontsf[Script=Cyrillic]{Arial}
+  \newfontfamily\cyrillicfonttt[Script=Cyrillic]{Courier New}
+
+  \newfontfamily\englishfont{Times New Roman}
+  \newfontfamily\englishfontsf{Arial}
+  \newfontfamily\englishfonttt{Courier New}
+
+  \renewcommand{\UrlFont}{\small\rmfamily\tt}
+}{%
+  \usepackage[T1,T2A]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage[english, russian]{babel}
+  \usepackage{csquotes}
+  \IfFileExists{pscyr.sty}{\usepackage{pscyr}}{}  % Подключение pscyr
+}
+
+% Для борьбы с переполнениями за счет разреженных слов в абзаце
+\emergencystretch=25pt
+
+\usepackage{enumitem}
+
+\usepackage[
+    language = auto,        % Получение языка из babel.
+    autolang = other,       % Многоязычная библиография.
+    defernumbers = true,    % Раздельная нумерация.
+    style = gost-numeric,
+    maxnames = 10,
+    movenames = false,
+    sorting = ynt
+]{biblatex} % To load multiple bib files.
+
+% Библиографический список в соответствии с ГОСТ.
+\makeatletter
+\ltx@iffilelater{biblatex-gost.def}{2017/02/01}%
+{\toggletrue{bbx:gostbibliography}%
+    \renewcommand*{\revsdnamepunct}{\addcomma}}{}
+\makeatother
+
+% Общий список.
+\addbibresource{references.bib}
+
+% Список публикаций соискателя.
+\addbibresource{references.bib}
+\DeclareSourcemap{
+    \maps[datatype=bibtex, overwrite]{
+        \map{
+            \perdatasource{references.bib}
+            \step[fieldset=KEYWORDS, fieldvalue=ys, append]
+        }
+    }
+}
+
+% Счётчики.
+\usepackage[figure,table]{totalcount}   % Счётчик рисунков и таблиц.
+\usepackage{totcount}                   % Пакет создания счётчиков на основе последнего номера подсчитываемого элемента (может требовать дважды компилировать документ).
+\AtEveryBibitem{\stepcounter{citenum}\stepcounter{citenum_my}}
+
+\usepackage{totpages}
+\usepackage[abspage, user, lastpage]{zref}
+
+\usepackage{microtype}
+
+%for lists
+\usepackage[ampersand]{easylist}
+\ListProperties(Hide=100, Hang=false, Margin=0mm, Indent1=10.5mm, Indent2=15mm, Style*=-- ,
+Style2*=$\bullet$ ,Style3*=$\circ$ ,Style4*=\tiny$\blacksquare$ )
+
+\newenvironment{easylistNum}{
+    \begin{easylist}
+        \ListProperties(Hide1=0, Hang=false, Margin=0mm, Indent1=10.5mm, Indent2=15mm, Start1=1, Style*=, FinalMark={)})}
+        {\ListProperties(Hide=100, Hang=false, Margin=0mm, Indent1=10.5mm, Indent2=15mm, Style*=-- , Style2*=$\bullet$ ,Style3*=$\circ$ ,Style4*=\tiny$\blacksquare$ )
+    \end{easylist}}
+
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{mathtools} % Use \rcases
+\usepackage{longtable, array}
+\usepackage{graphicx, epsfig}
+
+\usepackage{algorithm}        % Для вставки псевдокода
+\usepackage{algpseudocode}    % Для вставки псевдокода
+
+% Русская традиция начертания греческих букв
+\usepackage{upgreek} % Прямые греческие ради русской традиции (в формулах записывается \alpha как \upalpha и т.д.)
+
+\usepackage{siunitx} % For Celsium sign only
+
+\usepackage{tikz} % Language for producing vector graphics
+
+\begin{document}
+
+% Регистрируем счётчики в системе "totcount".
+\regtotcounter{totalcount@table}
+\regtotcounter{totalcount@figure}
+\regtotcounter{TotPages}
+\regtotcounter{textpages}
+
+% Вычисление страниц только с текстом.
+\makeatletter
+\def\textpages{\number\numexpr\zref@extract{lastpagetocount}{abspage}-\zref@extract{firstpagetocount}{abspage}+1\relax}
+\makeatother
+
+\newtotcounter{textpages}
+\setcounter{textpages}{\textpages}
+
+% Вычисление количества источников.
+\newtotcounter{citenum}
+\newtotcounter{citenum_my}
+
+\hypersetup{
+    pdftitle = {РАЗРАБОТКА И РЕАЛИЗАЦИЯ ЭФФЕКТИВНОГО АЛГОРИТМА ПЛАНИРОВАНИЯ ПРОИЗВОДСТВА},
+    pdfauthor = {Ситковец Яна Сергеевна},
+    pdfsubject = {Диссертация},
+    pdfkeywords = {ТеХ, диссертация}
+}
+
+\include{chapters/1_titlepage}
+
+\tableofcontents
+
+\zlabel{firstpagetocount}
+
+\include{chapters/2_introduction}
+\include{chapters/3_characteristic}
+
+\include{chapters/chapter_1}
+\include{chapters/chapter_2}
+
+\zlabel{lastpagetocount}
+
+\printbibliography
+
+\end{document}
