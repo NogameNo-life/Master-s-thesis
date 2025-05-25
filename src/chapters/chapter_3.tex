@@ -1,2 +1,56 @@
 \chapter{ ГЛАВА 3. Реализация модели в Timefold Solver}
 \label{ch:chapter3}
+
+\section{ Выбор инструмента}
+
+Для реализации задачи оптимизации выбрана библиотека Timefold Solver — современный инструмент для решения задач планирования и расписания с использованием эвристик и метаэвристик. Timefold позволяет описывать модель задачи через аннотированные Java-классы и автоматически подбирать эффективную стратегию поиска решения.
+
+\subsection{Модель планирования}
+
+Модель включает следующие компоненты: \
+
+Класс Job (фасуемое задание)
+
+Аннотирован как @PlanningEntity. Содержит:
+
+\begin{itemize}
+    \item String id, String name — идентификаторы;
+    \item Product product — тип продукта (с глазурью);
+    \item int quantity — количество сырков;
+    \item Line line — назначаемая линия;
+    \item Duration getDuration() — длительность, вычисляемая динамически:
+\end{itemize}
+
+Класс Line (фасовочная линия). Аннотирован как @PlanningEntity. Хранит список заданий:
+
+@PlanningListVariable \
+private List<Job> jobs; \
+
+Каждая линия должна обрабатывать задания последовательно с учётом длительности и времени мойки между несовместимыми продуктами. \
+
+\subsection{Ограничения и ConstraintProvider}
+
+Ограничения описаны в классе FoodPackagingConstraintProvider. Примеры:
+
+Жёсткое ограничение: несовместимость линии и типа продукта \
+
+Конфигурация решателя cоздаётся через SolverConfig: \
+
+SolverFactory<PackagingSchedule> solverFactory = SolverFactory.create(new SolverConfig()
+    .withSolutionClass(PackagingSchedule.class)
+    .withEntityClasses(Job.class, Line.class)
+    .withConstraintProviderClass(FoodPackagingConstraintProvider.class)
+    .withTerminationSpentLimit(Duration.ofMinutes(5)));
+
+\subsection{Экспорт результатов}
+
+Решение сохраняется в JSON-файл, содержащий:
+
+\begin{itemize}
+    \item список заданий с назначенными линиями;
+    \item длительность фасовки;
+    \item ID, тип продукта и глазури;
+    \item дата производственного заказа.
+\end{itemize}
+
+кспорт реализован в классе DataExporter.

@@ -59,6 +59,11 @@
 %%   \listoftables
 %%
 %%
+\newenvironment{javacode}
+  {\VerbatimEnvironment
+   \begin{minted}[fontsize=\small, linenos, breaklines, frame=lines, bgcolor=gray!5]{java}}
+  {\end{minted}}
+
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 \ProvidesClass{thesisby}
               [2016/09/01 v1.1
