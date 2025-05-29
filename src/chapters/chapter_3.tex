@@ -5,6 +5,142 @@
 
 Для реализации задачи оптимизации выбрана библиотека Timefold Solver — современный инструмент для решения задач планирования и расписания с использованием эвристик и метаэвристик. Timefold позволяет описывать модель задачи через аннотированные Java-классы и автоматически подбирать эффективную стратегию поиска решения.
 
+Он используется для:
+\begin{itemize}
+    \item Производственного планирования.
+    \item Расписаний.
+    \item Логистики.
+    \item фасовки продуктов
+\end{itemize}
+
+Общий процесс планирования сводится к:
+\begin{enumerate}
+    \item Моделирование задачи. В данный процесс входят описание сущности @PlanningEntity, назначение переменных @PlanningVariable, определение решения @PlanningSolution, после чего задаются ограничения ConstraintProvider.
+    \item Инициализация решателя. Читает конфигурацию из XML или Java DSL. Загружает решение и возможные значения переменных.
+    \item Фаза Construction Heuristics. Быстро создаёт первое допустимое решение. Например, назначает задания на любые линии с минимальными нарушениями.
+    \item Фаза Local Search. Итеративно улучшает решение с помощью эвристик: Late Acceptance, Simulated Annealing, Tabu Search, Great Deluge. На каждом шаге: применяет ход $\rightarrow$ пересчитывает score $\rightarrow$ решает, принимать ли новое решение.
+    \item По достижении времени/шага/качества решение сохраняется. Может быть просмотрено в приложении, сохранено в БД или отправлено пользователя.
+\end{enumerate}
+
+Основные аннотации:
+
+\begin{itemize}
+    \item @PlanningSolution.\
+Аннотирует корневой класс, содержащий всё решение.
+\begin{lstlisting}[caption={класс PackagingSchedule}, label={lst:plSolution}]
+@PlanningSolution
+public class PackagingSchedule {
+
+    @ProblemFactProperty
+    private WorkCalendar workCalendar;
+
+    @ProblemFactCollectionProperty
+    private List<Product> products;
+
+    @PlanningEntityCollectionProperty
+    private List<Line> lines;
+
+    @PlanningEntityCollectionProperty
+    @ValueRangeProvider
+    private List<Job> jobs;
+
+    @PlanningScore
+    private HardMediumSoftLongScore score;
+
+    // Ignored by Timefold, used by the UI to display solve or stop solving button
+    private SolverStatus solverStatus;
+}
+\end{lstlisting}
+
+\item @PlanningEntity.
+Аннотирует объекты, чьи поля (переменные) изменяются при решении задачи.
+\begin{lstlisting}[caption={класс Job}, label={lst:plVariable}]
+@PlanningEntity
+public class Job {
+
+    @PlanningId
+    private String id;
+    private String name;
+    private Product product;
+    private int quantity;
+    private Duration duration;
+    private LocalDateTime minStartTime;
+    private LocalDateTime idealEndTime;
+    private LocalDateTime maxEndTime;
+    private int priority;
+    @PlanningPin
+    private boolean pinned;
+}
+\end{lstlisting}
+
+\item @PlanningVariable. Указывает на переменную, которую решатель будет оптимизировать. \
+Аргументы:
+\begin{itemize}
+    \item valueRangeProviderRefs — имя метода или поля, дающего допустимые значения.
+\end{itemize}
+
+\item ValueRangeProvider. Объявляет допустимые значения для @PlanningVariable.
+\begin{lstlisting}[caption={класс Job}, label={lst:plValueProvider}]
+@ValueRangeProvider(id = "lineRange")
+public List<Line> getLineList() { ... }
+\end{lstlisting}
+
+\item @ProblemFact и @ProblemFactCollectionProperty. Описывают неизменяемые факты (например, список линий, типов продуктов), которые используются при расчётах и ограничениях.
+
+\item @ShadowVariable. Переменная, автоматически вычисляемая на основе других переменных. \
+Примеры:
+\begin{itemize}
+    \item endTime = startTime + duration
+    \item duration = quantity / speed, где speed зависит от линии
+\end{itemize}
+
+\item CascadingShadowVariable. Обозначает, что при изменении переменной также должны быть обновлены зависимые shadow-поля.
+\begin{lstlisting}[caption={каскадные теневые переменные в классе Job}, label={lst:fcProvider}]
+@CascadingUpdateShadowVariable(targetMethodName = "updateStartCleaningDateTime")
+    private LocalDateTime startCleaningDateTime;
+    @CascadingUpdateShadowVariable(targetMethodName = "updateStartCleaningDateTime")
+    private LocalDateTime startProductionDateTime;
+    @CascadingUpdateShadowVariable(targetMethodName = "updateStartCleaningDateTime")
+\end{lstlisting}
+
+\vspace{6cm}
+\item Ограничения (Constraints). Описываются в классе, реализующем ConstraintProvider.
+\begin{lstlisting}[caption={класс FoodPackagingConstraintProvider}, label={lst:fcProvider}]
+public class FoodPackagingConstraintProvider implements ConstraintProvider {
+
+    @Override
+    public Constraint[] defineConstraints(ConstraintFactory factory) {
+        return new Constraint[] {
+                // Hard constraints
+                maxEndDateTime(factory),
+
+                plushMustBeOnLine1(factory),
+                rodOnlyOnLines456(factory),
+                cactusOnlyOnLines123(factory),
+
+                // Medium constraints
+                idealEndDateTime(factory),
+                // Soft constraints
+                operatorCleaningConflict(factory),
+                minimizeMakespan(factory)
+        };
+    }
+}
+\end{lstlisting}
+\end{itemize}
+
+
+\begin{lstlisting}[caption={ Пример ограничения производства сырков Плюш только на линии №1}, label={lst:fcProvider}]
+protected Constraint plushMustBeOnLine1(ConstraintFactory factory) {
+        return factory.forEach(Job.class)
+                .filter(job -> job.getLine() != null && job.getProduct() != null)
+                .filter(job -> job.getProduct().getType() == ProductType.PLUSH)
+                .filter(job -> !"1".equals(job.getLine().getId()))
+                .penalizeLong(HardMediumSoftLongScore.ONE_HARD, job -> 1000L)
+                .asConstraint("PLUSH must be on line 1");
+    }
+\end{lstlisting}
+
 \subsection{Модель планирования}
 
 Модель включает следующие компоненты: \
@@ -34,13 +170,15 @@ private List<Job> jobs; \
 
 Жёсткое ограничение: несовместимость линии и типа продукта \
 
-Конфигурация решателя cоздаётся через SolverConfig: \
-
+Конфигурация решателя cоздаётся через SolverConfig:
+\vspace{5cm}
+\begin{lstlisting}[caption={SolverConfig}, label={lst:example}]
 SolverFactory<PackagingSchedule> solverFactory = SolverFactory.create(new SolverConfig()
     .withSolutionClass(PackagingSchedule.class)
     .withEntityClasses(Job.class, Line.class)
     .withConstraintProviderClass(FoodPackagingConstraintProvider.class)
     .withTerminationSpentLimit(Duration.ofMinutes(5)));
+\end{lstlisting}
 
 \subsection{Экспорт результатов}
 
@@ -54,3 +192,5 @@ SolverFactory<PackagingSchedule> solverFactory = SolverFactory.create(new Solver
 \end{itemize}
 
 кспорт реализован в классе DataExporter.
+
+
