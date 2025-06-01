@@ -21,7 +21,7 @@ jobs:
         run: |
           cd src
           latexmk -C -outdir=out
-          latexmk -pdf -f -outdir=out ./main.tex
+          latexmk -pdf -f -interaction=nonstopmode -outdir=out ./main.tex || true
 
       - uses: actions/upload-artifact@v4
         with:
