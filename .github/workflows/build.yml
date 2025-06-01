@@ -20,7 +20,8 @@ jobs:
       - name: Build PDF
         run: |
           cd src
-          latexmk -pdf -outdir=out ./main.tex
+          latexmk -C -outdir=out
+          latexmk -pdf -f -outdir=out ./main.tex
 
       - uses: actions/upload-artifact@v4
         with:
