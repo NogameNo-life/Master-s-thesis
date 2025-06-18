@@ -16,14 +16,14 @@ plt.rcParams.update({
 # Рисуем график
 plt.plot(x_new, y_smooth, 
          linestyle='-', 
-         color='blue', 
+         color='#00ffff', 
          linewidth=2)
 
 #plt.plot(x, y, 'ro', markersize=8)
-plt.plot(0.709, 2.5, 'ro', markersize=8, markerfacecolor='red')
-plt.plot(3.5, 3.5, 'ro', markersize=8, markerfacecolor='red')
-plt.plot(6, 3.548, 'ro', markersize=8, markerfacecolor='red')
-plt.plot(8, 4, 'ro', markersize=8, markerfacecolor='red')
+plt.plot(0.709, 2.5, 'ro', markersize=8, markerfacecolor='#dc143c')
+plt.plot(3.5, 3.5, 'ro', markersize=8, markerfacecolor='#dc143c')
+plt.plot(6, 3.548, 'ro', markersize=8, markerfacecolor='#dc143c')
+plt.plot(8, 4, 'ro', markersize=8, markerfacecolor='#dc143c')
 
 plt.text(1,   # X-координата текста
         2.5,   # Y-координата текста 
@@ -52,7 +52,7 @@ plt.text(7.018,   # X-координата текста
 
 chi_x, chi_y = 1.197, 2.215
 
-plt.xlabel(r'$x$')
-plt.ylabel(r'$f(x)$', fontsize=12)  
-#plt.grid(True)
+plt.xlabel(r'$\mathbf{x}$', color='black')
+plt.ylabel(r'$\mathbf{f(x)}$', color='black')
+
 plt.show()
