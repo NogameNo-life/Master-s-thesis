@@ -13,12 +13,12 @@ y_smooth = cs(x_new)
 # Рисуем график
 plt.plot(x_new, y_smooth, 
          linestyle='-', 
-         color='blue', 
+         color='#00ffff', 
          linewidth=2)
 
 # Оставляем оригинальные точки с маркерами
 #plt.plot(x, y, 'ro', markersize=8, markerfacecolor='red')
-plt.plot(0.987, 3.251, 'ro', markersize=8, markerfacecolor='red')
+plt.plot(0.987, 3.251, 'ro', markersize=8, markerfacecolor='#dc143c')
 
 plt.text(0.987,   # X-координата текста
         3.251 + 0.15,   # Y-координата текста 
@@ -35,7 +35,7 @@ x_horizontal_start, x_horizontal_end = 0.5, 2.0  # Границы горизон
 plt.hlines(y=y_horizontal, 
           xmin=x_horizontal_start, 
           xmax=x_horizontal_end,
-          colors='purple', 
+          colors='#7f1ba6bf', 
           linestyles='-', 
           linewidth=2,
           alpha=0.7,
@@ -45,7 +45,7 @@ plt.hlines(y=y_horizontal,
 plt.vlines(x=[x_horizontal_start, x_horizontal_end], 
           ymin=y_vertical_bottom, 
           ymax=y_vertical_top,
-          colors='purple',
+          colors='#7f1ba6bf',
           linestyles='-', 
           linewidth=1.5,
           alpha=0.7,
@@ -62,5 +62,5 @@ plt.text(chi_x,   # X-координата текста
         weight='bold')
 
 plt.title("Задача одномерной оптимизации")
-plt.grid(True)
+#plt.grid(True)
 plt.show()
