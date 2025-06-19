@@ -7,6 +7,18 @@
 \usepackage{etoolbox,ifxetex,ifluatex}
 \usepackage[unicode,hypertexnames=false]{hyperref}
 
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
+\tikzstyle{block} = [rectangle, draw, rounded corners=5pt, minimum height=1.2cm, minimum width=3.8cm, text centered, font=\small]
+\tikzstyle{arrow} = [thick, -{Latex}]
+\tikzstyle{user} = [block, fill=blue!20]
+\tikzstyle{web} = [block, fill=green!20]
+\tikzstyle{service} = [block, fill=orange!20]
+\tikzstyle{docker} = [block, fill=gray!15]
+\tikzstyle{server} = [block, fill=red!10, minimum width=14cm]
+
+
 %%% Проверка используемого TeX-движка %%%
 \ifboolexpr{bool{xetex} or bool{luatex}}{%
   \usepackage{fontspec}
@@ -189,9 +201,13 @@ Style2*=$\bullet$ ,Style3*=$\circ$ ,Style4*=\tiny$\blacksquare$ )
 \include{chapters/chapter_1}
 \include{chapters/chapter_2}
 \include{chapters/chapter_3}
+\include{chapters/chapter_4}
+\include{chapters/chapter_5}
 
+\include{chapters/conclusion}
 \zlabel{lastpagetocount}
 
-\printbibliography
+\addcontentsline{toc}{section}{СПИСОК ЛИТЕРАТУРЫ}
+\printbibliography[title={СПИСОК ЛИТЕРАТУРЫ}]
 
 \end{document}

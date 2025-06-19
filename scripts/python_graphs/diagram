@@ -1,0 +1,23 @@
+// Блок-схема проекта
+digraph {
+	graph [rankdir=LR]
+	A [label="начало" shape=oval]
+	B [label="Техническое
+задание" shape=note]
+	C [label="Начальный
+проект" shape=oval]
+	D [label="Оценка
+эффективности" shape=oval]
+	E [label="Хорошо?" shape=diamond]
+	F [label="Окончательный
+проект" shape=note]
+	G [label="Изменение
+проекта" shape=oval]
+	A -> B
+	B -> C
+	C -> D
+	D -> E
+	E -> F [label="да"]
+	E -> G [label="нет"]
+	G -> D
+}
